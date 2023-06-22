@@ -23,7 +23,7 @@ end
 
 @define_attributes struct Plot{T}
     size::Union{Symbol, Tuple{Int, Int}, Tuple{Tuple{Int, Symbol}, Tuple{Int, Symbol}}} = :auto
-end :aliases = Dict(:plot_size => :size)
+end :aliases = Dict(:plot_size => (:size,))
 
 function plot(; backend = Symbol(@load_preference("backend", "gr")), kwargs...)
     plotattributes = Base.@locals

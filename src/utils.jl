@@ -38,9 +38,9 @@ macro define_attributes(expr, args...)
     push!(insert_block.args, :(
             const $(Symbol(lowercase(string(T)), "_defaults")) = $(NamedTuple(Symbol(lowercase(string(T)), "_", key)=> value for (key, value) in key_dict))
         ),
-        #TODO: :(
-        #     const $(Symbol(lowercase(string(T)), "_aliases")) = $(NamedTuple( value => key for value in alias_dict(key), key in keys(alias_dict)))
-        # ),
+        :(
+            const $(Symbol(lowercase(string(T)), "_aliases")) = $(NamedTuple( value => key for key in keys(alias_dict) for value in alias_dict[key]))
+        ),
     )
     # for (key, value) in key_dict
     #     # e.g. _series_defaults[key] = value
