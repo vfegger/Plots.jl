@@ -35,12 +35,17 @@ macro define_attributes(expr, args...)
     _splitdef!(expr.args[3], key_dict)
 
     insert_block = Expr(:block)
+    tname = lowercase(string(T))
+    tdefaults = NamedTuple(Symbol(tname, "_", key)=> value for (key, value) in key_dict)
     push!(insert_block.args, :(
-            const $(Symbol(lowercase(string(T)), "_defaults")) = $(NamedTuple(Symbol(lowercase(string(T)), "_", key)=> value for (key, value) in key_dict))
+            const $(Symbol(tname, "_defaults")) = $tdefaults
         ),
         :(
-            const $(Symbol(lowercase(string(T)), "_aliases")) = $(NamedTuple( value => key for key in keys(alias_dict) for value in alias_dict[key]))
+            const $(Symbol(tname, "_aliases")) = $(NamedTuple( value => key for key in keys(alias_dict) for value in alias_dict[key]))
         ),
+        :(
+            const $(Symbol(tname, "_keys")) = $(Set(keys(tdefaults))) # TODO: make these immutable
+        )
     )
     # for (key, value) in key_dict
     #     # e.g. _series_defaults[key] = value
