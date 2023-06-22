@@ -2,9 +2,10 @@ module Playground
 
 using Preferences
 
+include("utils.jl")
+
 const defaults = (
-    backend = Symbol(@load_preference("backend", "gr")),
-    palette = Symbol(@load_preference("palette", "default"))
+    palette = Symbol(@load_preference("palette", "default")),
 )
 
 const aliases = (be = :backend,)
@@ -20,9 +21,11 @@ macro with(f, attributes)
     end |> esc
 end
 
-struct Plot{T} end
+@define_attributes struct Plot{T}
+    size::Union{Symbol, Tuple{Int, Int}, Tuple{Tuple{Int, Symbol}, Tuple{Int, Symbol}}} = :auto
+end :aliases = Dict(:plot_size => :size)
 
-function plot(; backend = defaults.backend, kwargs...)
+function plot(; backend = Symbol(@load_preference("backend", "gr")), kwargs...)
     plotattributes = Base.@locals
     for (k, v) in kwargs
         plotattributes[getproperty(aliases, k)] = v
@@ -30,6 +33,8 @@ function plot(; backend = defaults.backend, kwargs...)
     @show plotattributes
     return Plot{plotattributes[:backend]}()
 end
+
+recipe(args...; kwargs...) = plot(args...; seriestype = :recipe, kwargs...)
 
 function __init__()
     @show defaults
