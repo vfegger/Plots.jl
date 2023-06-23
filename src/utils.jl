@@ -14,7 +14,7 @@ Also creates pluralized and non-underscore aliases for these keywords.
 macro define_attributes(expr, args...)
     # TODO: pluralization, non_underscorisation, match-table
     match_table = :(:match = ())
-    alias_dict = Dict()
+    alias_dict = KW()
     for arg in args
         if arg.head == :(=) && arg.args[1] == QuoteNode(:match)
             match_table = arg
@@ -30,7 +30,7 @@ macro define_attributes(expr, args...)
         T = T.args[1]
     end
 
-    key_dict = Dict()
+    key_dict = KW()
     original = copy(expr)
     _splitdef!(expr.args[3], key_dict)
 

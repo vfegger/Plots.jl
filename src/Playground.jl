@@ -2,6 +2,7 @@ module Playground
 
 using Preferences
 
+const KW = Dict{Symbol, Any}
 include("utils.jl")
 
 const defaults = (
@@ -22,16 +23,13 @@ macro with(f, attributes)
 end
 
 @define_attributes struct Plot{T}
-    size::Union{Symbol, Tuple{Int, Int}, Tuple{Tuple{Int, Symbol}, Tuple{Int, Symbol}}} = :auto
+    size::Union{Symbol, Tuple{Int, Int}, Tuple{Tuple{Int, Symbol}, Tuple{Int, Symbol}}} = eval(Meta.parse(@load_preference("plot_size", ":auto")))
 end :aliases = Dict(:plot_size => (:size,))
 
 function plot(; backend = Symbol(@load_preference("backend", "gr")), kwargs...)
-    plotattributes = Base.@locals
-    for (k, v) in kwargs
-        plotattributes[getproperty(aliases, k)] = v
-    end
+    plotattributes = KW(kwargs...)
     @show plotattributes
-    return Plot{plotattributes[:backend]}()
+    return Plot{backend}()
 end
 
 recipe(args...; kwargs...) = plot(args...; seriestype = :recipe, kwargs...)
