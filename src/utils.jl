@@ -897,6 +897,15 @@ colorbartitlefont(sp::Subplot) = font(;
     color = sp[:colorbar_titlefontcolor],
 )
 
+colorbartickfont(sp::Subplot) = font(;
+    family = sp[:colorbar_tickfontfamily],
+    pointsize = sp[:colorbar_tickfontsize],
+    valign = sp[:colorbar_tickfontvalign],
+    halign = sp[:colorbar_tickfonthalign],
+    rotation = sp[:colorbar_tickfontrotation],
+    color = sp[:colorbar_tickfontcolor],
+)
+
 titlefont(sp::Subplot) = font(;
     family = sp[:titlefontfamily],
     pointsize = sp[:titlefontsize],
