@@ -561,7 +561,7 @@ function gr_colorbar_info(sp::Subplot)
                 str_lhs, str_rhs = split(str, "e")
                 mantissa = parse(Float64, str_lhs)
                 exponent = parse(Int, str_rhs)
-                formatted_ticks[i] = "$mantissa\\times 10^{$exponent}"
+                formatted_ticks[i] = "$mantissa \\times 10^{$exponent}"
             else
                 formatted_ticks[i] = Printf.format(Printf.Format("%.3f"), value)
             end
