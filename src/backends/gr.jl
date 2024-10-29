@@ -553,9 +553,20 @@ end
 function gr_colorbar_info(sp::Subplot)
     clims = gr_clims(sp)
     cticks = if sp[:colorbar_ticks] == :auto
-        f = Ref(Printf.Format("%.3f"))
-        r = clims[1]:(clims[2]-clims[1])/6:clims[2]
-        (r,Printf.format.(f,r))
+        r = clims[1]:((clims[2] - clims[1]) / 6):clims[2]
+        formatted_ticks = Array{String}(undef, length(r))
+        for (i, value) in enumerate(r)
+            if abs(value) > 10^3 || abs(value) < 10^-2
+                str = Printf.format(Printf.Format("%.2e"), value)
+                str_lhs, str_rhs = split(str, "e")
+                mantissa = parse(Float64, str_lhs)
+                exponent = parse(Int, str_rhs)
+                formatted_ticks[i] = "$mantissa\\times 10^{$exponent}"
+            else
+                formatted_ticks[i] = Printf.format(Printf.Format("%.3f"), value)
+            end
+        end
+        (r, formatted_ticks)
     else
         sp[:colorbar_ticks]
     end
@@ -564,30 +575,36 @@ function gr_colorbar_info(sp::Subplot)
     wticks, hticks, clims, cticks
 end
 
-function gr_draw_colorbar_axis(sp,cticks,x_max,x_min,z_max,z_min)
+function gr_draw_colorbar_axis(sp, cticks, x_max, x_min, z_max, z_min)
     gr_set_line(1, :solid, plot_color(:black), sp)
     GR.setclip(0)
     segments = Segments(2)
-    push!(segments,(x_min,z_min),(x_min,z_max))
-    push!(segments,(x_max,z_min),(x_max,z_max))
-    push!(segments,(x_min,z_min),(x_max,z_min))
-    push!(segments,(x_min,z_max),(x_max,z_max))
+    push!(segments, (x_min, z_min), (x_min, z_max))
+    push!(segments, (x_max, z_min), (x_max, z_max))
+    push!(segments, (x_min, z_min), (x_max, z_min))
+    push!(segments, (x_min, z_max), (x_max, z_max))
     for y in cticks[1]
         sx1 = x_max #x_min + (x_max-x_min) / 2
-        sx2 = x_max + (x_max-x_min) / 3
+        sx2 = x_max + (x_max - x_min) / 3
         sy = y
-        push!(segments,(sx1,sy),(sx2,sy))
+        push!(segments, (sx1, sy), (sx2, sy))
     end
     gr_polyline(coords(segments)...)
     GR.setclip(1)
 end
 
-const gr_cbar_label_offset = Ref((0.0108,-0.0108))
+const gr_cbar_label_offset = Ref((0.0108, -0.0108))
 
-function gr_label_colorbar(vp,sp,cticks)
+function gr_label_colorbar(vp, sp, cticks)
     gr_set_font(gr_colorbar_tick_font(sp), sp; halign = :left, valign = :bottom)
-    for (i,y) in enumerate(cticks[1])
-        gr_text(vp.xmax + width(vp) / 3 + gr_cbar_label_offset[][1], vp.ymin + gr_cbar_label_offset[][2] + (i-1) * height(vp) / (length(cticks[1])-1), cticks[2][i])
+    for (i, y) in enumerate(cticks[1])
+        gr_text(
+            vp.xmax + width(vp) / 3 + gr_cbar_label_offset[][1],
+            vp.ymin +
+            gr_cbar_label_offset[][2] +
+            (i - 1) * height(vp) / (length(cticks[1]) - 1),
+            cticks[2][i],
+        )
     end
 end
 
@@ -652,13 +669,17 @@ function gr_draw_colorbar(cbar::GRColorbar, sp::Subplot, vp::GRViewport)
         #(yscale = sp[:colorbar_scale]) ∈ _logScales && GR.setscale(gr_y_log_scales[yscale])
         # signature: gr.axes(x_tick, y_tick, x_org, y_org, major_x, major_y, tick_size)
         # GR.axes(0, z_tick, x_max, z_min, 0, 1, gr_colorbar_tick_size[])
-        gr_draw_colorbar_axis(sp,cticks,x_max,x_min,z_max,z_min)
-        gr_label_colorbar(vp_cmap,sp,cticks)
+        gr_draw_colorbar_axis(sp, cticks, x_max, x_min, z_max, z_min)
+        gr_label_colorbar(vp_cmap, sp, cticks)
     end
 
     title = gr_colorbar_title(sp)
     gr_set_font(title.font, sp; halign = :center, valign = :top)
-    gr_text(vp_cmap.xmax + width(vp_cmap) / 3 + tick_max_width + 2 * gr_cbar_label_offset[][1], ycenter(vp), title.str)
+    gr_text(
+        vp_cmap.xmax + width(vp_cmap) / 3 + tick_max_width + 2 * gr_cbar_label_offset[][1],
+        ycenter(vp),
+        title.str,
+    )
 
     GR.restorestate()
     nothing
