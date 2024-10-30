@@ -556,7 +556,7 @@ function gr_colorbar_info(sp::Subplot)
         r = clims[1]:((clims[2] - clims[1]) / 6):clims[2]
         formatted_ticks = Array{String}(undef, length(r))
         for (i, value) in enumerate(r)
-            if abs(value) > 10^3 || abs(value) < 10^-2
+            if abs(value) > 10^3 || (abs(value) < 10^-2 && value != 0.0)
                 str = Printf.format(Printf.Format("%.2e"), value)
                 str_lhs, str_rhs = split(str, "e")
                 mantissa = parse(Float64, str_lhs)
@@ -593,7 +593,7 @@ function gr_draw_colorbar_axis(sp, cticks, x_max, x_min, z_max, z_min)
     GR.setclip(1)
 end
 
-const gr_cbar_label_offset = Ref((0.0108, -0.0108))
+const gr_cbar_label_offset = Ref((0.0, 0.0)) #Ref((0.0108, -0.0108))
 
 function gr_label_colorbar(vp, sp, cticks)
     gr_set_font(gr_colorbar_tick_font(sp), sp; halign = :left, valign = :bottom)
