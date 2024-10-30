@@ -593,7 +593,7 @@ function gr_draw_colorbar_axis(sp, cticks, x_max, x_min, z_max, z_min)
     GR.setclip(1)
 end
 
-const gr_cbar_label_offset = Ref((0.0108, -0.0108))
+const gr_cbar_label_offset = Ref((0.01, -0.0108))
 
 function gr_label_colorbar(vp, sp, cticks)
     gr_set_font(gr_colorbar_tick_font(sp), sp; halign = :left, valign = :bottom)
